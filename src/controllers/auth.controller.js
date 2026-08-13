@@ -157,30 +157,22 @@ async function refreshToken(req, res) {
       return res.status(401).json({ message: "No token provided!" });
     }
 
-    // Verify refresh token
     const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
-
     const session = await redis.get(`session:${decoded.userId}`);
 
     if (!session) {
-      return res.status(401).json({
-        message: "Session expired. Please login again.",
-      });
+      return res.status(401).json({ message: "Session expired. Please login again." });
     }
 
     const sessionData = JSON.parse(session);
-
     if (sessionData.refreshToken !== refreshToken) {
-      return res.status(401).json({
-        message: "Invalid refresh token.",
-      });
+      return res.status(401).json({ message: "Invalid refresh token." });
     }
 
-    // Issue new access token
     const newAccessToken = jwt.sign(
       { userId: decoded.userId },
       process.env.JWT_SECRET,
-      { expiresIn: "15m" },
+      { expiresIn: "15m" }
     );
 
     return res.status(200).json({
@@ -188,9 +180,10 @@ async function refreshToken(req, res) {
       accessToken: newAccessToken,
     });
   } catch (error) {
-    return res.status(500).json({ message: error.message || "Server error" });
+    return res.status(401).json({ message: error.message || "Refresh failed" });
   }
 }
+
 
 async function getMeUser(req, res) {
   try {
