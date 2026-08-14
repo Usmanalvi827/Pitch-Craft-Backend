@@ -145,7 +145,6 @@ async function loginUser(req, res) {
       accessToken,
     });
   } catch (error) {
-    console.log(error.message)
     return res.status(500).json({ message: error.message || "Server error" });
   }
 }
@@ -158,6 +157,7 @@ async function refreshToken(req, res) {
     }
 
     const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
+
     const session = await redis.get(`session:${decoded.userId}`);
 
     if (!session) {
@@ -195,8 +195,8 @@ async function getMeUser(req, res) {
 
     return res.status(200).json({
       id: user._id,
-      firstname: user.firstname,
-      lastname: user.lastname,
+      firstName: user.firstname,
+      lastName: user.lastname,
       username: user.username,
       email: user.email,
     });
@@ -208,25 +208,29 @@ async function getMeUser(req, res) {
 async function logoutUser(req, res) {
   try {
     const token = req.cookies.refreshToken;
-    // console.log("Logout Token:", token);
-    if (token) {
-      try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        // console.log("Decoded Token:", decoded);
-        // Delete the session from Redis
-        await redis.del(`session:${decoded.userId}`);
-        // Clear the refresh token cookie
-        res.clearCookie("refreshToken", {
-          httpOnly: true,
-          secure: false, // set true in production with https
-          // secure: process.env.NODE_ENV === "production",
-          // sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-          sameSite: "strict",
-        });
-        return res.status(200).json({ message: "Logout successful" });
-      } catch (error) {
-        console.error("Error verifying token:", error);
-      }
+
+    if (!token) {
+      return res.status(200).json({ message: "Already logged out" });
+    }
+
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      await redis.del(`session:${decoded.userId}`);
+      res.clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: false, // set true in production with https
+        sameSite: "strict",
+      });
+      return res.status(200).json({ message: "Logout successful" });
+    } catch (error) {
+      // refresh token existed but was invalid/expired - still clear the
+      // cookie so the browser stops sending a dead token
+      res.clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: false,
+        sameSite: "strict",
+      });
+      return res.status(200).json({ message: "Session already invalid" });
     }
   } catch (error) {
     return res.status(500).json({ message: error.message || "Server error" });
