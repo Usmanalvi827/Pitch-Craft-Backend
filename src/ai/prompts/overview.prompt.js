@@ -1,4 +1,4 @@
-import { SIMPLE_LANGUAGE_INSTRUCTIONS } from "./writingStyle.prompt.js";
+import { SIMPLE_LANGUAGE_INSTRUCTIONS } from "./WritingStyle.prompt.js";
 
 export async function buildOverviewPrompt({ title, idea, industry, country }) {
   //   console.log(title, idea, industry, country);

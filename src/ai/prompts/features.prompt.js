@@ -1,5 +1,6 @@
 // src/prompts/features.prompt.js
-import { SIMPLE_LANGUAGE_INSTRUCTIONS } from "./writingStyle.prompt.js";
+import { SIMPLE_LANGUAGE_INSTRUCTIONS } from "./WritingStyle.prompt.js";
+
 
 export function buildFeaturesPrompt({ title, idea, industry, country }) {
   return `
