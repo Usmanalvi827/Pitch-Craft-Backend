@@ -13,19 +13,13 @@ const app = express();
 
 // console.log(process.env.FRONTEND_URL)
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://pitch-craft-frontend.vercel.app",
-];
-
-app.use(
-  cors({
-    origin: allowedOrigins,
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+app.use(cors({
+  origin: [
+    "http://localhost:5173",
+    "https://pitch-craft-frontend.vercel.app"
+  ],
+  credentials: true
+}));
 
 app.use(express.json());
 app.use(cookieParser());
